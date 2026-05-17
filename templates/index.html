@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cow Skin Disease Detection</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+
+            background: linear-gradient(to right, #dfe9f3, #ffffff);
+
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 20px;
+        }
+
+        .container {
+
+            background: white;
+
+            width: 100%;
+            max-width: 500px;
+
+            padding: 30px;
+
+            border-radius: 20px;
+
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.2);
+
+            text-align: center;
+        }
+
+        h1 {
+
+            color: #2c3e50;
+
+            margin-bottom: 25px;
+
+            font-size: 40px;
+        }
+
+        .upload-section {
+
+            margin-bottom: 20px;
+        }
+
+        input {
+
+            margin: 15px 0;
+        }
+
+        button {
+
+            background: #27ae60;
+
+            color: white;
+
+            border: none;
+
+            padding: 14px 25px;
+
+            border-radius: 10px;
+
+            font-size: 18px;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+        }
+
+        button:hover {
+
+            background: #219150;
+            transform: scale(1.03);
+        }
+
+        #preview {
+
+            width: 100%;
+
+            max-height: 300px;
+
+            object-fit: cover;
+
+            border-radius: 15px;
+
+            margin-top: 20px;
+
+            display: none;
+        }
+
+        .result-card {
+
+            margin-top: 25px;
+
+            background: #f8f9fa;
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            display: none;
+        }
+
+        .result-card h2 {
+
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .confidence {
+
+            color: green;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .loader {
+
+            margin-top: 20px;
+
+            border: 6px solid #f3f3f3;
+
+            border-top: 6px solid #27ae60;
+
+            border-radius: 50%;
+
+            width: 50px;
+
+            height: 50px;
+
+            animation: spin 1s linear infinite;
+
+            display: none;
+
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @keyframes spin {
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .tips {
+
+            margin-top: 20px;
+
+            text-align: left;
+
+            background: #eef7ff;
+
+            padding: 15px;
+
+            border-radius: 10px;
+        }
+
+        .tips h3 {
+
+            margin-bottom: 10px;
+        }
+
+        .tips ul {
+
+            padding-left: 20px;
+        }
+
+        @media(max-width:600px) {
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Cow Skin Disease Detection</h1>
+
+        <div class="upload-section">
+
+            <!-- Camera + Gallery Access -->
+            <input type="file"
+                   id="imageInput"
+                   accept="image/*"
+                   capture="environment">
+
+            <br>
+
+            <button onclick="predictDisease()">
+                Predict Disease
+            </button>
+
+        </div>
+
+        <!-- Image Preview -->
+        <img id="preview">
+
+        <!-- Loader -->
+        <div class="loader" id="loader"></div>
+
+        <!-- Result -->
+        <div class="result-card" id="resultCard">
+
+            <h2 id="diseaseText"></h2>
+
+            <p class="confidence" id="confidenceText"></p>
+
+        </div>
+
+        <!-- Tips -->
+        <div class="tips">
+
+            <h3>Tips for Better Detection</h3>
+
+            <ul>
+                <li>Capture image in good lighting</li>
+                <li>Focus clearly on infected skin</li>
+                <li>Avoid blurry images</li>
+                <li>Use close-up images for better accuracy</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const imageInput = document.getElementById('imageInput');
+
+        const preview = document.getElementById('preview');
+
+        imageInput.addEventListener('change', function () {
+
+            const file = this.files[0];
+
+            if (file) {
+
+                preview.src = URL.createObjectURL(file);
+
+                preview.style.display = 'block';
+            }
+        });
+
+        async function predictDisease() {
+
+            const file = imageInput.files[0];
+
+            if (!file) {
+
+                alert("Please select an image");
+
+                return;
+            }
+
+            const formData = new FormData();
+
+            formData.append('file', file);
+
+            document.getElementById('loader').style.display = 'block';
+
+            document.getElementById('resultCard').style.display = 'none';
+
+            const response = await fetch('/predict', {
+
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            document.getElementById('loader').style.display = 'none';
+
+            document.getElementById('resultCard').style.display = 'block';
+
+            document.getElementById('diseaseText').innerHTML =
+                `Disease: ${data.disease}`;
+
+            document.getElementById('confidenceText').innerHTML =
+                `Confidence: ${data.confidence}%`;
+        }
+
+    </script>
+
+</body>
+
+</html>
