@@ -1,0 +1,1 @@
+# cow-skin-disease-detection
